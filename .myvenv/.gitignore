@@ -1,0 +1,8 @@
+
+# Windows
+/Include
+/Lib
+/Scripts
+
+# All
+pyvenv.cfg
