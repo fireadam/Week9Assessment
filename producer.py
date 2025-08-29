@@ -61,29 +61,28 @@ class VendingMachineProducer:
         amount = dollars[selection][1]
         
         self.producer.send("vendingmachine", {"action": "insert_money", "amount": amount})
+        self.producer.flush()   
         print(f"Producer -> {amount} sent!")
 
     def show_items(self):
-        producer = self.instantiate_producer()
         print("Showing items...")
-        producer.send("vendingmachine", {"action": "show_items"})
-        producer.flush()
-        producer.close()
+        self.producer.send("vendingmachine", {"action": "show_items"})
+        self.producer.flush()
+
 
     def select_items(self):
-        producer = self.instantiate_producer()
         print("Selecting item...")
         item = self.read_required_string("Enter item code: ")
-        producer.send("vendingmachine", {"action": "select_item", "item": item})
-        producer.flush()
-        producer.close()
+        self.producer.send("vendingmachine", {"action": "select_item", "item": item})
+        self.producer.flush()
+        
+
 
     def refund(self):
-        producer = self.instantiate_producer()
         print("Refunding. . .")
-        producer.send("vendingmachine", {"action": "refund"})
-        producer.flush()
-        producer.close()
+        self.producer.send("vendingmachine", {"action": "refund"})
+        self.producer.flush()
+
         
     def menu(self):
         choice = self.choose_menu()

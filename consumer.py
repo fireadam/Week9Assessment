@@ -41,37 +41,52 @@ class VendingMachineConsumer():
             msg_type = data.get("type")
 
             action = data.get("action")
-            if action == "initialize_inventory":
-                self.handle_initalize_inventory(data)
-            elif action == "insert_money":
-                self.handle_insert_money()
+
+            if action == "insert_money":
+                self.handle_insert_money(data)
             elif action == "show_items":
                 #also keep track of inventory
-                self.handle_initalize_inventory(data)
+                self.handle_show_items()
             elif action == "select_item":
-                pass
+                self.handle_select_item(data)
             elif action == "refund":
-                pass
+                if self.balance > 0:
+                    print(f"Money refunded: {self.balance}")
+                    self.balance = 0
+                    
             else:
                 print(f"⚠️ Unknown message type: {msg_type}, full data: {data}")
-        self.producer.flush()
-        self.consumer.flush()
+       
         self.consumer.close()
-        self.producer.close()
 
 
-    
+    def handle_show_items(self):
+        print("Showing Items: ")
+        for name, item in self.inventory.items():
+            print(f"{name}: {item['quantity']} available at ${item['price']}")
+
     def handle_insert_money(self, data):
         amount = data.get("amount")
         self.balance += amount
         print(f"Consumer -> New Balance of {self.balance}")
 
 
-    def handle_bank(bank_msg):
-        # Example: {"type": "bank", "balance": 50}
-        print(f"🏦 Updating bank balance -> New balance: {bank_msg['balance']}")
 
- 
+    def handle_select_item(self, data):
+        item_code = data.get('item')
+        if item_code not in self.inventory:
+            print(f"Consumer -> {item_code} does not exist.")
+        elif self.inventory[item_code]['quantity'] <= 0: 
+            print(f"Consumer -> Ran out of {self.inventory[item_code]}, sorry!")
+        elif self.inventory[item_code]['price'] > self.balance:
+            print(f"Consumer -> Not enough $$$ inserted. Please insert at least {self.inventory[item_code]['price'] - self.balance}") 
+        else:
+            self.inventory[item_code]['quantity'] -= 1
+            self.balance -= self.inventory[item_code]['price']
+            print(f"Consumer -> Here is one {self.inventory[item_code]}, enjoy!")
+            print(f"Consumer -> Here's the change:\n{self.balance}")
+            self.balance = 0 
+
 
 if __name__ == "__main__":
     vending_machine_consumer = VendingMachineConsumer()
